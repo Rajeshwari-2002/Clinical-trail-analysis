@@ -1,4 +1,4 @@
-# Clinical Trial Analysis - SAS Project
+# Clinical Trial Analysis - Project
 ## Overview
 This project demonstrates a basic clinical trial analysis using SAS. 
 It includes:
