@@ -1,0 +1,64 @@
+/* Step 0: Define output path */
+%let outdir = ../output;
+
+/* Step 1: Import data */
+proc import datafile="../data/clinical_trial_data.csv"
+    out=trial
+    dbms=csv
+    replace;
+    getnames=yes;
+run;
+
+/* Step 2: Compute changes from baseline */
+data trial;
+    set trial;
+    BP_Change = BP_Baseline - BP_After;
+    HR_Change = HR_Baseline - HR_After;
+run;
+
+/* Step 3: Save summary statistics to output folder */
+ods html file="&outdir./summary_stats.html";
+
+proc means data=trial mean std median min max;
+    class Treatment;
+    var BP_Change HR_Change;
+run;
+
+ods html close;
+
+/* Step 4: Save t-test results */
+ods html file="&outdir./ttest_results.html";
+
+proc ttest data=trial;
+    class Treatment;
+    var BP_Change HR_Change;
+run;
+
+ods html close;
+
+/* Step 5: Save ANOVA results */
+ods html file="&outdir./anova_results.html";
+
+proc anova data=trial;
+    class Treatment;
+    model BP_Change = Treatment;
+    means Treatment / tukey;
+run;
+
+ods html close;
+
+/* Step 6: Save boxplots as images */
+ods graphics / reset imagename="BP_Change_Boxplot" imagefmt=png outputfmt=png;
+ods listing gpath="&outdir.";
+
+proc sgplot data=trial;
+    vbox BP_Change / category=Treatment;
+    title "Blood Pressure Change by Treatment";
+run;
+
+proc sgplot data=trial;
+    vbox HR_Change / category=Treatment;
+    title "Heart Rate Change by Treatment";
+run;
+
+ods listing close;
